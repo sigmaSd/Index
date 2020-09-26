@@ -27,11 +27,25 @@ fn write_table(table: Vec<Vec<String>>) {
     let stdout = std::io::stdout();
     let mut stdout = stdout.lock();
 
-    //dbg!(&table);
     let col_len = table.get(0).unwrap().len();
-    for col in 0..col_len {
-        for row in 0..table.len() {
-            write!(stdout, "{}", table[row][col]).unwrap();
+
+    // find column unified width
+    use std::collections::HashMap;
+    let mut col_widths: HashMap<usize, usize> = HashMap::new();
+
+    for row in 0..col_len {
+        for col in 0..table.len() {
+            col_widths.insert(
+                col,
+                std::cmp::max(*col_widths.get(&col).unwrap_or(&0), table[col][row].len()),
+            );
+        }
+    }
+
+    // print while transposing
+    for row in 0..col_len {
+        for col in 0..table.len() {
+            write!(stdout, "{:1$}", table[col][row], col_widths[&col]).unwrap();
             write!(stdout, " ").unwrap();
         }
         writeln!(stdout).unwrap();
