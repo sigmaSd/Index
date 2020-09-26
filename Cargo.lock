@@ -2,5 +2,5 @@
 # It is not intended for manual editing.
 [[package]]
 name = "table_idx"
-version = "1.0.0"
+version = "1.0.1"
 
