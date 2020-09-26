@@ -54,10 +54,14 @@ fn write_table(table: Vec<Vec<String>>) {
 
 fn filter_table(table: &[Vec<String>], tokens: (Vec<LexToken>, Vec<LexToken>)) -> Vec<Vec<String>> {
     fn adjust_idx(idx: isize, len: usize) -> Option<usize> {
+        if idx == 0 {
+            panic!("0 is an invalid idx");
+        }
+
         if idx > 0 {
             Some((idx - 1) as usize)
         } else {
-            let idx = idx + len as isize - 1;
+            let idx = idx + len as isize;
             if idx < 0 {
                 None
             } else {
