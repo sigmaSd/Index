@@ -16,3 +16,7 @@ Get any row,column combination from a terminal output
 `printf $table | idx "\~3;2~"`
 
 `printf $table | idx "~3;_"`
+
+# Install
+
+`cargo install table_idx`
