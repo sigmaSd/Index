@@ -1,9 +1,9 @@
 use std::io::{self, Read, Write};
 
 fn main() -> io::Result<()> {
-    let buffer = std::env::args().nth(2);
-    let buffer = if let Some(buffer) = buffer {
-        buffer
+    let file_path = std::env::args().nth(2);
+    let buffer = if let Some(file_path) = file_path {
+        std::fs::read_to_string(file_path).expect("Error opening file")
     } else {
         let mut buffer = String::new();
         io::stdin().read_to_string(&mut buffer)?;
