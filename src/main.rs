@@ -101,10 +101,11 @@ fn parse_idx(raw_idx: String) -> (Vec<LexToken>, Vec<LexToken>) {
                     num.push(c);
                 }
                 ',' => {
-                    assert!(!num.is_empty());
-                    tokens.push(Token::Num(
-                        num.drain(..).collect::<String>().parse().unwrap(),
-                    ));
+                    if !num.is_empty() {
+                        tokens.push(Token::Num(
+                            num.drain(..).collect::<String>().parse().unwrap(),
+                        ));
+                    }
                     tokens.push(Token::Comma);
                 }
                 '~' => {
