@@ -53,8 +53,9 @@ fn filter_table(table: &[Vec<String>], tokens: (Vec<LexToken>, Vec<LexToken>)) -
     }
 
     // filter rows
-    let mut filtered_rows = vec![];
+    let mut filtered_rows: Vec<&Vec<String>> = vec![];
     if let LexToken::Any = tokens.0[0] {
+        filtered_rows = table.iter().collect();
     } else {
         let row_number = table.len();
         for row in tokens.0.into_iter() {
@@ -101,7 +102,7 @@ fn filter_table(table: &[Vec<String>], tokens: (Vec<LexToken>, Vec<LexToken>)) -
                         .map(|r| r.get(col))
                         .unwrap_or_default()
                         .map(ToOwned::to_owned)
-                        .unwrap_or_else(|| "az".to_string()),
+                        .unwrap_or_else(|| "_".to_string()),
                 );
             }
             new_rows.push(tmp_row.drain(..).collect());
@@ -115,6 +116,7 @@ fn filter_table(table: &[Vec<String>], tokens: (Vec<LexToken>, Vec<LexToken>)) -
 
     let mut filtered = vec![];
     if let LexToken::Any = tokens.1[0] {
+        filtered = filtered_rows.iter().collect();
     } else {
         for col in tokens.1.into_iter() {
             match col {
