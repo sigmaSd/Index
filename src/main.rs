@@ -16,9 +16,132 @@ fn main() -> io::Result<()> {
 
     let table = create_table(buffer);
 
-    //write_table(&table, lex_tokens);
+    let filtered_table = filter_table(&table, lex_tokens);
+
+    write_table(filtered_table);
 
     Ok(())
+}
+
+fn write_table(table: Vec<Vec<String>>) {
+    let stdout = std::io::stdout();
+    let mut stdout = stdout.lock();
+    for row in table {
+        for col in row {
+            write!(stdout, "{}", col).unwrap();
+            write!(stdout, " ").unwrap();
+        }
+        writeln!(stdout).unwrap();
+    }
+}
+
+fn filter_table(table: &[Vec<String>], tokens: (Vec<LexToken>, Vec<LexToken>)) -> Vec<Vec<String>> {
+    fn adjust_idx(idx: isize, len: usize) -> Option<usize> {
+        if idx > 0 {
+            Some((idx - 1) as usize)
+        } else {
+            let idx = idx + len as isize - 1;
+            if idx < 0 {
+                None
+            } else {
+                Some(idx as usize)
+            }
+        }
+    }
+
+    // filter rows
+    let mut filtered_rows = vec![];
+    if let LexToken::Any = tokens.0[0] {
+    } else {
+        let row_number = table.len();
+        for row in tokens.0.into_iter() {
+            match row {
+                LexToken::Num(n) => {
+                    if let Some(n) = adjust_idx(n, row_number) {
+                        filtered_rows.push(&table[n]);
+                    }
+                }
+                LexToken::Range((lower_limit, upper_limit)) => match (lower_limit, upper_limit) {
+                    (Limit::Limited(ll), Limit::Limited(ul)) => {
+                        let ll = adjust_idx(ll, row_number).unwrap();
+                        let ul = adjust_idx(ul, row_number).unwrap();
+                        filtered_rows.extend(table[ll..ul + 1].iter());
+                    }
+                    (Limit::Unlimited, Limit::Limited(ul)) => {
+                        let ul = adjust_idx(ul, row_number).unwrap();
+                        filtered_rows.extend(table[..ul + 1].iter());
+                    }
+                    (Limit::Limited(ll), Limit::Unlimited) => {
+                        let ll = adjust_idx(ll, row_number).unwrap();
+                        filtered_rows.extend(table[ll..].iter());
+                    }
+                    _ => unreachable!(),
+                },
+                _ => unreachable!(),
+            }
+        }
+    }
+
+    // filter cols
+    //dbg!(&filtered_rows);
+    fn transpose(rows: Vec<&Vec<String>>) -> Vec<Vec<String>> {
+        let mut new_rows = vec![];
+        //Note: we're considering a perfcet table
+        let row_len = rows.get(0).unwrap().len();
+
+        let mut tmp_row: Vec<String> = vec![];
+
+        for col in 0..row_len {
+            for row in 0..rows.len() {
+                tmp_row.push(
+                    rows.get(row)
+                        .map(|r| r.get(col))
+                        .unwrap_or_default()
+                        .map(ToOwned::to_owned)
+                        .unwrap_or_else(|| "az".to_string()),
+                );
+            }
+            new_rows.push(tmp_row.drain(..).collect());
+        }
+        assert!(tmp_row.is_empty());
+        new_rows
+    }
+
+    let filtered_rows = transpose(filtered_rows);
+    let col_number = filtered_rows.len();
+
+    let mut filtered = vec![];
+    if let LexToken::Any = tokens.1[0] {
+    } else {
+        for col in tokens.1.into_iter() {
+            match col {
+                LexToken::Num(n) => {
+                    if let Some(n) = adjust_idx(n, col_number) {
+                        filtered.push(&filtered_rows[n]);
+                    }
+                }
+                LexToken::Range((lower_limit, upper_limit)) => match (lower_limit, upper_limit) {
+                    (Limit::Limited(ll), Limit::Limited(ul)) => {
+                        let ll = adjust_idx(ll, col_number).unwrap();
+                        let ul = adjust_idx(ul, col_number).unwrap();
+                        filtered.extend(filtered_rows[ll..ul + 1].iter());
+                    }
+                    (Limit::Unlimited, Limit::Limited(ul)) => {
+                        let ul = adjust_idx(ul, col_number).unwrap();
+                        filtered.extend(filtered_rows[..ul + 1].iter());
+                    }
+                    (Limit::Limited(ll), Limit::Unlimited) => {
+                        let ll = adjust_idx(ll, col_number).unwrap();
+                        filtered.extend(filtered_rows[ll..].iter());
+                    }
+                    _ => unreachable!(),
+                },
+                _ => unreachable!(),
+            }
+        }
+    }
+
+    filtered.into_iter().map(ToOwned::to_owned).collect()
 }
 
 fn create_table(buffer: String) -> Vec<Vec<String>> {
@@ -124,7 +247,6 @@ fn parse_idx(raw_idx: String) -> (Vec<LexToken>, Vec<LexToken>) {
             }
         }
         if !num.is_empty() {
-            dbg!(&num);
             tokens.push(Token::Num(
                 num.drain(..).collect::<String>().parse().unwrap(),
             ));
