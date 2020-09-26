@@ -26,9 +26,12 @@ fn main() -> io::Result<()> {
 fn write_table(table: Vec<Vec<String>>) {
     let stdout = std::io::stdout();
     let mut stdout = stdout.lock();
-    for row in table {
-        for col in row {
-            write!(stdout, "{}", col).unwrap();
+
+    //dbg!(&table);
+    let col_len = table.get(0).unwrap().len();
+    for col in 0..col_len {
+        for row in 0..table.len() {
+            write!(stdout, "{}", table[row][col]).unwrap();
             write!(stdout, " ").unwrap();
         }
         writeln!(stdout).unwrap();
