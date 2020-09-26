@@ -1,10 +1,10 @@
 [package]
 name = "table_idx"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Nbiba Bedis <bedisnbiba@gmail.com>"]
 edition = "2018"
 readme = "README.md"
-description = "NetLimiter-like traffic shaping for Linux"
+description = "Get any row,column combination from a terminal output"
 repository = "https://github.com/sigmaSd/Index"
 license = "MIT"
 
