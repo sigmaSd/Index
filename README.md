@@ -11,8 +11,12 @@ Get any row,column combination from a terminal output
 - catch all with `_`
 
 # Example
-printf $table | idx "1,3;2"
+`printf $table | idx "1,3;2"`
 
-printf $table | idx "\~3;2~"
+`printf $table | idx "\~3;2~"`
 
-printf $table | idx "~3;_"
+`printf $table | idx "~3;_"`
+
+# Install
+
+`cargo install table_idx`
