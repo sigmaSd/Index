@@ -37,7 +37,7 @@ fn write_table(table: Vec<Vec<String>>) -> Result<(), io::Error> {
     let mut col_widths: HashMap<usize, usize> = HashMap::new();
 
     for row in 0..col_len {
-        for col in 0..table.len() {
+        for (col, _) in table.iter().enumerate() {
             col_widths.insert(
                 col,
                 std::cmp::max(*col_widths.get(&col).unwrap_or(&0), table[col][row].len()),
